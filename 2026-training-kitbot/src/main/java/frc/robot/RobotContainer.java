@@ -18,8 +18,6 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // Arcade drive: left stick Y = forward/back, right stick X = turn.
-    // If pushing right turns the robot left, remove the minus sign on getRightX().
     drivetrain.setDefaultCommand(
         Commands.run(
             () ->
@@ -30,6 +28,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new DriveDistance(drivetrain, 120.0); // 10 ft in inches
+    return new DriveDistance(drivetrain, 120.0);
   }
 }
