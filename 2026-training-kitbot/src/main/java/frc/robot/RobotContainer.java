@@ -18,8 +18,6 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // Arcade drive: left stick Y = forward/back, right stick X = turn.
-    // If pushing right turns the robot left, remove the minus sign on getRightX().
     drivetrain.setDefaultCommand(
         Commands.run(
             () ->
@@ -30,7 +28,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // 10 ft in inches. The timeout stops the auton if the robot stalls just short of the goal.
     return new DriveDistance(drivetrain, 120.0).withTimeout(DriveConstants.AUTO_TIMEOUT_SECONDS);
   }
 }

@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.DriveConstants;
 
-/** 4x CIM (brushed) drivetrain on SPARK MAXes: one leader and one follower per side. */
 public class Drivetrain extends SubsystemBase {
   private final SparkMax leftLeader =
       new SparkMax(DriveConstants.LEFT_LEADER_ID, MotorType.kBrushed);
@@ -66,12 +65,10 @@ public class Drivetrain extends SubsystemBase {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  /** Teleop driving. forward and rotation are -1..1. */
   public void arcadeDrive(double forward, double rotation) {
     drive.arcadeDrive(forward, rotation);
   }
 
-  /** Direct side control, -1..1. Used by the auton so turn direction is unambiguous. */
   public void tankDrive(double left, double right) {
     drive.tankDrive(left, right, false);
   }
@@ -97,7 +94,6 @@ public class Drivetrain extends SubsystemBase {
     return (getLeftInches() + getRightInches()) / 2.0;
   }
 
-  /** Yaw in degrees, counter-clockwise positive (Phoenix 6 convention). */
   public double getHeadingDegrees() {
     return pigeon.getYaw().getValueAsDouble();
   }

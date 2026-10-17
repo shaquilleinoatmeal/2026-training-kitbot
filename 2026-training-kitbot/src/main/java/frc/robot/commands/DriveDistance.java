@@ -7,11 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.DriveConstants;
 import frc.robot.subsystems.Drivetrain;
 
-/**
- * Drives straight a set distance using encoder feedback.
- * Distance PID on the average of both encoders, plus a Pigeon 2 correction that holds the
- * heading the robot started with.
- */
 public class DriveDistance extends Command {
   private final Drivetrain drivetrain;
   private final double targetInches;
@@ -51,8 +46,6 @@ public class DriveDistance extends Command {
             -DriveConstants.AUTO_MAX_SPEED,
             DriveConstants.AUTO_MAX_SPEED);
 
-    // Yaw is counter-clockwise positive. If the robot has drifted left (yaw > 0),
-    // speed up the left side and slow the right to steer back toward straight.
     double correction = DriveConstants.HEADING_KP * drivetrain.getHeadingDegrees();
 
     drivetrain.tankDrive(forward + correction, forward - correction);
