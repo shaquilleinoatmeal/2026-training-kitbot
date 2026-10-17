@@ -43,6 +43,13 @@ public final class DriveConstants {
   // Auton tuning (starting values, adjust on the real robot)
   public static final double DISTANCE_KP = 0.02;
   public static final double DISTANCE_KD = 0.002;
+
+  // Motion profile limits (inches/sec and inches/sec^2). Start low, raise once it's reliable.
+  public static final double MAX_VELOCITY_IN_PER_SEC = 50.0;
+  public static final double MAX_ACCEL_IN_PER_SEC2 = 50.0;
+  // Feedforward in motor-output units (-1..1). Measure these, see the notes in the chat.
+  public static final double KS = 0.06; // output needed just to start moving
+  public static final double KV = 0.007; // output per inch/sec of speed (about 1 / free speed)
   // Motor output per degree of Pigeon yaw error
   public static final double HEADING_KP = 0.02;
   public static final double AUTO_MAX_SPEED = 0.5;
