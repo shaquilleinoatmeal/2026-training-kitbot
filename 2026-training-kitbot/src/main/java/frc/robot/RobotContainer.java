@@ -30,6 +30,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new DriveDistance(drivetrain, 120.0); // 10 ft in inches
+    // 10 ft in inches. The timeout stops the auton if the robot stalls just short of the goal.
+    return new DriveDistance(drivetrain, 120.0).withTimeout(DriveConstants.AUTO_TIMEOUT_SECONDS);
   }
 }

@@ -55,4 +55,6 @@ public final class DriveConstants {
   public static final double AUTO_MAX_SPEED = 0.5;
   public static final double DISTANCE_TOLERANCE_INCHES = 1.0;
   public static final double VELOCITY_TOLERANCE_IN_PER_SEC = 2.0;
+  // Give up on the 10 ft drive after this long (profile takes ~3.4 s at the limits above).
+  public static final double AUTO_TIMEOUT_SECONDS = 6.0;
 }
