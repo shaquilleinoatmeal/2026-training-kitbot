@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,8 @@ public class DriveDistance extends Command {
           DriveConstants.DISTANCE_KD,
           new TrapezoidProfile.Constraints(
               DriveConstants.MAX_VELOCITY_IN_PER_SEC, DriveConstants.MAX_ACCEL_IN_PER_SEC2));
+  private final SimpleMotorFeedforward feedforward =
+      new SimpleMotorFeedforward(DriveConstants.KS, DriveConstants.KV);
 
   public DriveDistance(Drivetrain drivetrain, double targetInches) {
     this.drivetrain = drivetrain;
@@ -41,14 +44,11 @@ public class DriveDistance extends Command {
   public void execute() {
     double traveledInches = drivetrain.getAverageInches() - startInches;
     double pidOutput = distancePid.calculate(traveledInches, targetInches);
-    double velocitySetpoint = distancePid.getSetpoint().velocity;
     SmartDashboard.putNumber("Auto/Setpoint inches", distancePid.getSetpoint().position);
     SmartDashboard.putNumber("Auto/Traveled inches", traveledInches);
-    double feedforward =
-        DriveConstants.KS * Math.signum(velocitySetpoint) + DriveConstants.KV * velocitySetpoint;
     double forward =
         MathUtil.clamp(
-            pidOutput + feedforward,
+            pidOutput + feedforward.calculate(distancePid.getSetpoint().velocity),
             -DriveConstants.AUTO_MAX_SPEED,
             DriveConstants.AUTO_MAX_SPEED);
 

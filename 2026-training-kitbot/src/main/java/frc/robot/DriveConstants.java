@@ -14,6 +14,7 @@ public final class DriveConstants {
   public static final boolean FOLLOWER_OPPOSES_LEADER = false;
   public static final double VOLTAGE_COMPENSATION_VOLTS = 12.0;
   public static final double OPEN_LOOP_RAMP_SECONDS = 0.15;
+  public static final double TELEOP_MAX_OUTPUT = 0.6;
 
   public static final int[] LEFT_ENCODER_PORTS = {0, 1};
   public static final int[] RIGHT_ENCODER_PORTS = {2, 3};
