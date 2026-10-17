@@ -12,20 +12,22 @@ public final class DriveConstants {
   public static final int CURRENT_LIMIT_AMPS = 40;
   public static final boolean RIGHT_SIDE_INVERTED = true;
   public static final boolean FOLLOWER_OPPOSES_LEADER = false;
+  public static final double VOLTAGE_COMPENSATION_VOLTS = 12.0;
+  public static final double OPEN_LOOP_RAMP_SECONDS = 0.15;
 
   public static final int[] LEFT_ENCODER_PORTS = {0, 1};
   public static final int[] RIGHT_ENCODER_PORTS = {2, 3};
   public static final boolean LEFT_ENCODER_REVERSED = false;
   public static final boolean RIGHT_ENCODER_REVERSED = true;
 
-  public static final double ENCODER_COUNTS_PER_REV = 2048;
+  public static final double ENCODER_CYCLES_PER_REV = 2048;
   public static final double ENCODER_TURNS_PER_WHEEL_TURN = 1.0;
   public static final double WHEEL_DIAMETER_INCHES = 6.0;
   public static final double CALIBRATION_FACTOR = 1.0;
 
-  public static final double INCHES_PER_COUNT =
+  public static final double INCHES_PER_CYCLE =
       (Math.PI * WHEEL_DIAMETER_INCHES)
-          / (ENCODER_COUNTS_PER_REV * ENCODER_TURNS_PER_WHEEL_TURN)
+          / (ENCODER_CYCLES_PER_REV * ENCODER_TURNS_PER_WHEEL_TURN)
           * CALIBRATION_FACTOR;
 
   public static final double DISTANCE_KP = 0.02;

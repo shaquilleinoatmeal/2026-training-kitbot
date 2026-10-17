@@ -3,6 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.DriveConstants;
 import frc.robot.subsystems.Drivetrain;
@@ -10,6 +11,8 @@ import frc.robot.subsystems.Drivetrain;
 public class DriveDistance extends Command {
   private final Drivetrain drivetrain;
   private final double targetInches;
+  private double startInches;
+  private double startHeadingDegrees;
 
   private final ProfiledPIDController distancePid =
       new ProfiledPIDController(
@@ -29,15 +32,18 @@ public class DriveDistance extends Command {
 
   @Override
   public void initialize() {
-    drivetrain.resetEncoders();
-    drivetrain.resetHeading();
-    distancePid.reset(drivetrain.getAverageInches());
+    startInches = drivetrain.getAverageInches();
+    startHeadingDegrees = drivetrain.getHeadingDegrees();
+    distancePid.reset(0.0);
   }
 
   @Override
   public void execute() {
-    double pidOutput = distancePid.calculate(drivetrain.getAverageInches(), targetInches);
+    double traveledInches = drivetrain.getAverageInches() - startInches;
+    double pidOutput = distancePid.calculate(traveledInches, targetInches);
     double velocitySetpoint = distancePid.getSetpoint().velocity;
+    SmartDashboard.putNumber("Auto/Setpoint inches", distancePid.getSetpoint().position);
+    SmartDashboard.putNumber("Auto/Traveled inches", traveledInches);
     double feedforward =
         DriveConstants.KS * Math.signum(velocitySetpoint) + DriveConstants.KV * velocitySetpoint;
     double forward =
@@ -46,7 +52,8 @@ public class DriveDistance extends Command {
             -DriveConstants.AUTO_MAX_SPEED,
             DriveConstants.AUTO_MAX_SPEED);
 
-    double correction = DriveConstants.HEADING_KP * drivetrain.getHeadingDegrees();
+    double correction =
+        DriveConstants.HEADING_KP * (drivetrain.getHeadingDegrees() - startHeadingDegrees);
 
     drivetrain.tankDrive(forward + correction, forward - correction);
   }

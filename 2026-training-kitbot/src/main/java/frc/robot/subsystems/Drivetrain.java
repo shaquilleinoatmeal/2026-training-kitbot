@@ -44,8 +44,8 @@ public class Drivetrain extends SubsystemBase {
     configureFollower(leftFollower, leftLeader);
     configureFollower(rightFollower, rightLeader);
 
-    leftEncoder.setDistancePerPulse(DriveConstants.INCHES_PER_COUNT);
-    rightEncoder.setDistancePerPulse(DriveConstants.INCHES_PER_COUNT);
+    leftEncoder.setDistancePerPulse(DriveConstants.INCHES_PER_CYCLE);
+    rightEncoder.setDistancePerPulse(DriveConstants.INCHES_PER_CYCLE);
     resetEncoders();
   }
 
@@ -54,6 +54,8 @@ public class Drivetrain extends SubsystemBase {
     config.inverted(inverted);
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(DriveConstants.CURRENT_LIMIT_AMPS);
+    config.voltageCompensation(DriveConstants.VOLTAGE_COMPENSATION_VOLTS);
+    config.openLoopRampRate(DriveConstants.OPEN_LOOP_RAMP_SECONDS);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -61,6 +63,8 @@ public class Drivetrain extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(DriveConstants.CURRENT_LIMIT_AMPS);
+    config.voltageCompensation(DriveConstants.VOLTAGE_COMPENSATION_VOLTS);
+    config.openLoopRampRate(DriveConstants.OPEN_LOOP_RAMP_SECONDS);
     config.follow(leader, DriveConstants.FOLLOWER_OPPOSES_LEADER);
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
