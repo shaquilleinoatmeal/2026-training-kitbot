@@ -13,7 +13,7 @@ public final class DriveConstants {
   public static final boolean RIGHT_SIDE_INVERTED = true;
   public static final boolean FOLLOWER_OPPOSES_LEADER = false;
   public static final double VOLTAGE_COMPENSATION_VOLTS = 12.0;
-  public static final double OPEN_LOOP_RAMP_SECONDS = 0.15;
+  public static final double TELEOP_RAMP_SECONDS = 0.15;
   public static final double TELEOP_MAX_OUTPUT = 0.6;
 
   public static final int[] LEFT_ENCODER_PORTS = {0, 1};
@@ -36,11 +36,12 @@ public final class DriveConstants {
 
   public static final double MAX_VELOCITY_IN_PER_SEC = 50.0;
   public static final double MAX_ACCEL_IN_PER_SEC2 = 50.0;
-  public static final double KS = 0.06;
-  public static final double KV = 0.007;
+  public static final double KS_VOLTS = 0.72;
+  public static final double KV_VOLTS_PER_IN_PER_SEC = 0.084;
+  public static final double KA_VOLTS_PER_IN_PER_SEC2 = 0.0;
   public static final double HEADING_KP = 0.02;
-  public static final double AUTO_MAX_SPEED = 0.5;
   public static final double DISTANCE_TOLERANCE_INCHES = 1.0;
   public static final double VELOCITY_TOLERANCE_IN_PER_SEC = 2.0;
   public static final double AUTO_TIMEOUT_SECONDS = 6.0;
+  public static final double SYSID_STEP_VOLTS = 4.0;
 }

@@ -1,9 +1,14 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -20,7 +25,9 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim.KitbotWheelSiz
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.DriveConstants;
 
 public class Drivetrain extends SubsystemBase {
@@ -62,15 +69,37 @@ public class Drivetrain extends SubsystemBase {
   private final DifferentialDriveOdometry odometry;
   private final Field2d field = new Field2d();
 
+  private final SysIdRoutine sysIdRoutine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(null, Volts.of(DriveConstants.SYSID_STEP_VOLTS), null),
+          new SysIdRoutine.Mechanism(
+              volts -> {
+                double output = volts.in(Volts) / DriveConstants.VOLTAGE_COMPENSATION_VOLTS;
+                tankDrive(output, output);
+              },
+              log -> {
+                log.motor("drive-left")
+                    .voltage(Volts.of(leftOutput * DriveConstants.VOLTAGE_COMPENSATION_VOLTS))
+                    .linearPosition(Inches.of(getLeftInches()))
+                    .linearVelocity(InchesPerSecond.of(getLeftInchesPerSecond()));
+                log.motor("drive-right")
+                    .voltage(Volts.of(rightOutput * DriveConstants.VOLTAGE_COMPENSATION_VOLTS))
+                    .linearPosition(Inches.of(getRightInches()))
+                    .linearVelocity(InchesPerSecond.of(getRightInchesPerSecond()));
+              },
+              this));
+
   private DifferentialDrivetrainSim driveSim;
   private EncoderSim leftEncoderSim;
   private EncoderSim rightEncoderSim;
 
   public Drivetrain() {
-    configureLeader(leftLeader, false);
-    configureLeader(rightLeader, DriveConstants.RIGHT_SIDE_INVERTED);
-    configureFollower(leftFollower, leftLeader);
-    configureFollower(rightFollower, rightLeader);
+    configure(leftLeader, baseConfig());
+    configure(rightLeader, baseConfig().inverted(DriveConstants.RIGHT_SIDE_INVERTED));
+    configure(
+        leftFollower, baseConfig().follow(leftLeader, DriveConstants.FOLLOWER_OPPOSES_LEADER));
+    configure(
+        rightFollower, baseConfig().follow(rightLeader, DriveConstants.FOLLOWER_OPPOSES_LEADER));
     drive.setDeadband(0.0);
 
     leftEncoder.setDistancePerPulse(DriveConstants.INCHES_PER_CYCLE);
@@ -93,23 +122,15 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  private static void configureLeader(SparkMax motor, boolean inverted) {
+  private static SparkMaxConfig baseConfig() {
     SparkMaxConfig config = new SparkMaxConfig();
-    config.inverted(inverted);
     config.idleMode(IdleMode.kBrake);
     config.smartCurrentLimit(DriveConstants.CURRENT_LIMIT_AMPS);
     config.voltageCompensation(DriveConstants.VOLTAGE_COMPENSATION_VOLTS);
-    config.openLoopRampRate(DriveConstants.OPEN_LOOP_RAMP_SECONDS);
-    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    return config;
   }
 
-  private static void configureFollower(SparkMax motor, SparkMax leader) {
-    SparkMaxConfig config = new SparkMaxConfig();
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(DriveConstants.CURRENT_LIMIT_AMPS);
-    config.voltageCompensation(DriveConstants.VOLTAGE_COMPENSATION_VOLTS);
-    config.openLoopRampRate(DriveConstants.OPEN_LOOP_RAMP_SECONDS);
-    config.follow(leader, DriveConstants.FOLLOWER_OPPOSES_LEADER);
+  private static void configure(SparkMax motor, SparkBaseConfig config) {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -127,6 +148,14 @@ public class Drivetrain extends SubsystemBase {
     drive.stopMotor();
   }
 
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.quasistatic(direction);
+  }
+
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return sysIdRoutine.dynamic(direction);
+  }
+
   public void resetEncoders() {
     leftEncoder.reset();
     rightEncoder.reset();
@@ -138,6 +167,14 @@ public class Drivetrain extends SubsystemBase {
 
   public double getRightInches() {
     return rightEncoder.getDistance();
+  }
+
+  public double getLeftInchesPerSecond() {
+    return leftEncoder.getRate();
+  }
+
+  public double getRightInchesPerSecond() {
+    return rightEncoder.getRate();
   }
 
   public double getAverageInches() {
@@ -163,18 +200,26 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Drive/Left inches", getLeftInches());
     SmartDashboard.putNumber("Drive/Right inches", getRightInches());
     SmartDashboard.putNumber("Drive/Average inches", getAverageInches());
+    SmartDashboard.putNumber("Drive/Left in per sec", getLeftInchesPerSecond());
+    SmartDashboard.putNumber("Drive/Right in per sec", getRightInchesPerSecond());
     SmartDashboard.putNumber("Drive/Heading deg", getHeadingDegrees());
   }
 
   @Override
   public void simulationPeriodic() {
-    double volts = DriveConstants.VOLTAGE_COMPENSATION_VOLTS;
-    driveSim.setInputs(leftOutput * volts, rightOutput * volts);
+    driveSim.setInputs(withSimFriction(leftOutput), withSimFriction(rightOutput));
     driveSim.update(0.02);
 
     leftEncoderSim.setDistance(Units.metersToInches(driveSim.getLeftPositionMeters()));
     rightEncoderSim.setDistance(Units.metersToInches(driveSim.getRightPositionMeters()));
+    leftEncoderSim.setRate(Units.metersToInches(driveSim.getLeftVelocityMetersPerSecond()));
+    rightEncoderSim.setRate(Units.metersToInches(driveSim.getRightVelocityMetersPerSecond()));
     pigeon.getSimState().setSupplyVoltage(RobotController.getBatteryVoltage());
     pigeon.getSimState().setRawYaw(driveSim.getHeading().getDegrees());
+  }
+
+  private static double withSimFriction(double output) {
+    double volts = output * DriveConstants.VOLTAGE_COMPENSATION_VOLTS;
+    return Math.signum(volts) * Math.max(0.0, Math.abs(volts) - DriveConstants.KS_VOLTS);
   }
 }
